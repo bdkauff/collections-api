@@ -6,6 +6,7 @@
   { "zombie": "1.3.x"
   }
 , "scripts":
-  {"start": "coffee ListObjects --nodejs --max-old-space-size=4096"
+  { "list_ids": "coffee ListObjects --nodejs --max-old-space-size=4096"
+  , "parse_ids": "coffee ParseObjects --nodejs --max-old-space-size=4096"
   }
 }
