@@ -1,34 +1,31 @@
-nodeio = require 'node.io'
 fs = require 'fs'
-_ = require 'lodash'
+Browser = require 'zombie'
+zombie = new Browser loadCSS: false, runScripts: false
 
-class ListObjects extends nodeio.JobClass
-  queue = [1..6057]
+# Scrape the mobile site (sc_device=mobile) since aredridel/html5 hates the http://w.sharethis.com/button/buttons.js script
+# To scrape the non-mobile site, make sure to instantiate the Browser object with runScripts: false
+base = 'http://www.metmuseum.org/collections/search-the-collections?sc_device=mobile&ft=*&whento=2050&whenfunc=before&rpp=60&pg='
 
-  init: =>
-    fs.readdir './ids/', (err, files) =>
-      return 1 if err?
-      pages = (file.split('.')[0] for file in files)
-      queue = _.difference queue,pages
-      @status queue
+scrape_page = (page) ->
+  path = "ids/#{page}.json"
 
-  input: (start,num,callback) ->
-    callback false if start > queue.length
-    queue[start..start+num-1]
+  # skip up to the last file that exists
+  while fs.existsSync path
+    page++
+    path = "ids/#{page}.json"
 
-  run: (page) ->
-    base = 'http://www.metmuseum.org/collections/search-the-collections?ft=*&whento=2050&whenfunc=before&rpp=60&pg='
+  page-- if page > 1
 
-    @getHtml base+page, (err, $) =>
-      if err?
-        @status err
-        @retry()
-      else
-        $('.hover-content a').each (i,v) =>
-          @emit page:page, id:/([0-9]+)/.exec($(v).attr('href'))[0]
+  zombie.visit base+page, (e, browser, status) ->
+    console.log status if status is not 200
+    console.log e if e?
+    console.log "Scraping #{page}"
 
-  output: (rows) ->
-    for row in rows
-      fs.appendFileSync "ids/#{row.page}.json", "#{row.id}\n"
+    links = browser.document.querySelectorAll '.image-content a'
+    links = links.map (link) -> /([0-9]+)/.exec(link.href)[0]
+    fs.writeFile path, JSON.stringify links, (e) ->
+      console.log e if e?
 
-@job = new ListObjects jsdom: true
+    scrape_page ++page if ~browser.document.querySelectorAll('.next').length
+
+scrape_page 1

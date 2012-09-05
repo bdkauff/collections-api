@@ -1,8 +1,11 @@
 { "name": "metcollection_scraper"
-, "version": "0.0.1"
+, "version": "0.0.2"
 , "description": "Scrape metmuseum collections website"
 , "author": "Jonathan Dahan <jonathan@jedahan.com>"
 , "dependencies":
-  { "node.io": "0.4.x"
+  { "zombie": "1.3.x"
+  }
+, "scripts":
+  {"start": "coffee ListObjects --nodejs --max-old-space-size=4096"
   }
 }
