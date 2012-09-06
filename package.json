@@ -3,7 +3,7 @@
 , "description": "Scrape metmuseum collections website"
 , "author": "Jonathan Dahan <jonathan@jedahan.com>"
 , "dependencies":
-  { "zombie": "1.3.x"
+  { "zombie": "1.4.x"
   }
 , "scripts":
   { "list_ids": "coffee ListObjects --nodejs --max-old-space-size=4096"
