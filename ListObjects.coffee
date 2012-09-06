@@ -23,8 +23,9 @@ scrape_page = (page) ->
 
     links = browser.document.querySelectorAll '.image-content a'
     links = links.map (link) -> /([0-9]+)/.exec(link.href)[0]
+    return if links.length is 0
     fs.writeFileSync path, JSON.stringify links
 
-    scrape_page ++page if ~browser.document.querySelectorAll('.next').length
+    scrape_page ++page
 
 scrape_page 1
