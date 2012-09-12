@@ -3,8 +3,6 @@ Browser = require 'zombie'
 zombie = new Browser loadCSS: false, runScripts: false
 debug = true
 
-# Scrape the mobile site (sc_device=mobile) since aredridel/html5 hates the http://w.sharethis.com/button/buttons.js script
-# To scrape the non-mobile site, make sure to instantiate the Browser object with runScripts: false
 base = 'http://www.metmuseum.org/Collections/search-the-collections/'
 
 scrape_object = (id) ->
