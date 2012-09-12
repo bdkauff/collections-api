@@ -1,6 +1,7 @@
 fs = require 'fs'
 Browser = require 'zombie'
 zombie = new Browser loadCSS: false, runScripts: false
+debug = true
 
 # Scrape the mobile site (sc_device=mobile) since aredridel/html5 hates the http://w.sharethis.com/button/buttons.js script
 # To scrape the non-mobile site, make sure to instantiate the Browser object with runScripts: false
@@ -8,9 +9,8 @@ base = 'http://www.metmuseum.org/Collections/search-the-collections/'
 
 scrape_object = (id) ->
   path = "objects/#{id}.json"
-  if fs.existsSync path
-    if fs.statSync(path).size > 0
-      return
+
+  return if not debug and fs.existsSync(path) and fs.statSync(path)?.size > 0
 
   zombie.visit base+id, (e, browser, status) ->
     console.log status if status is not 200
