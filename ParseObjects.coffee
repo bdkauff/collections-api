@@ -1,27 +1,27 @@
+#console.time 'globals' # 14% (700ms)
 fs = require 'fs'
 Browser = require 'zombie'
 zombie = new Browser loadCSS: false, runScripts: false
 jsdom = require 'jsdom'
-jquery = require 'jquery'
+jquery = fs.readFileSync('./jquery.min.js').toString()
 debug = true
-
 base = 'http://www.metmuseum.org/Collections/search-the-collections/'
+#console.timeEnd 'globals'
 
 scrape_object = (id) ->
+  #console.time "visit #{id}"
   path = "objects/#{id}.json"
-
-  return if not debug and fs.existsSync(path) and fs.statSync(path)?.size > 0
-
   zombie.visit base+id, (e, browser, status) ->
     console.log status if status is not 200
     console.log e if e?
-    console.log "Scraping #{id}"
-
+    #console.timeEnd "visit #{id}"
+    #console.time "process #{id}"
     jsdom.env
-      html: browser.html
+      html: browser.html()
       src: [ jquery ]
       done: (e, window) ->
-        _$ = (e) -> window.$ e
+        # console.time 'processing' # 10% (50ms)
+        _$ = window.$
         object = {}
         arrify  = (str) -> str.split /\r\n/
         remove_nums = (arr) -> str.replace(/\([0-9,]+\)|:/, '').trim() for str in arr
@@ -36,11 +36,10 @@ scrape_object = (id) ->
         object[process _$(_$('dt')[i]).text()] = process _$(v).text() for v,i in _$('dd')
         # make an array of related artwork ids
         object['related-artworks'] = (+(_$(a).attr('href').match(/[0-9]+/g)[0]) for a in _$('.object-info a'))
-
-      fs.writeFileSync path, JSON.stringify object
-
-# read pages that are non-zero
-fs.readdir './ids', (e, pages) ->
-  for page in pages
-    for id in require "./ids/#{page}"
-      scrape_object id
+        #console.timeEnd 'processing'
+        
+        fs.writeFileSync path, JSON.stringify object
+        #console.timeEnd "process #{id}"
+        
+for arg in process.argv[2..]
+  scrape_object id for id in require arg
