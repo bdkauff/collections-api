@@ -21,7 +21,7 @@ scrape_object = (id) ->
       src: [ jquery ]
       done: (e, window) ->
         # console.time 'processing' # 10% (50ms)
-        _$ = window.$
+        $ = window.$
         object = {}
         arrify  = (str) -> str.split /\r\n/
         remove_nums = (arr) -> str.replace(/\([0-9,]+\)|:/, '').trim() for str in arr
@@ -30,12 +30,12 @@ scrape_object = (id) ->
         process = (str) -> flatten remove_null remove_nums arrify str
         object.id = +id
         # grab the uri for the image, if there is one
-        object.image = _$('a[name="art-object-fullscreen"] > img').attr('src')
+        object.image = $('a[name="art-object-fullscreen"] > img').attr('src')
         object.image = null unless /^http/.test object.image
         # grab each definition and put them in their own map
-        object[process _$(_$('dt')[i]).text()] = process _$(v).text() for v,i in _$('dd')
+        object[process $($('dt')[i]).text()] = process $(v).text() for v,i in $('dd')
         # make an array of related artwork ids
-        object['related-artworks'] = (+(_$(a).attr('href').match(/[0-9]+/g)[0]) for a in _$('.object-info a'))
+        object['related-artworks'] = (+($(a).attr('href').match(/[0-9]+/g)[0]) for a in $('.object-info a'))
         #console.timeEnd 'processing'
         
         fs.writeFileSync path, JSON.stringify object
