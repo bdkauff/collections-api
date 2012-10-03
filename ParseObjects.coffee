@@ -29,6 +29,8 @@ scrape_object = (id) ->
         flatten = (arr) -> if arr.length is 1 then arr[0] else arr
         process = (str) -> flatten remove_null remove_nums arrify str
         object.id = +id
+        # grab the gallery id if it exists
+        object['gallery-id'] = +$('.gallery-id a').text().match(/[0-9]+/g)[0] or null
         # grab the uri for the image, if there is one
         object.image = $('a[name="art-object-fullscreen"] > img').attr('src')
         object.image = null unless /^http/.test object.image
