@@ -24,6 +24,7 @@ scrape_object = (id) ->
         $ = window.$
         object = {}
         arrify  = (str) -> str.split /\r\n/
+        trim = (arr) -> str.trim() for str in arr
         remove_nums = (arr) -> str.replace(/\([0-9,]+\)|:/, '').trim() for str in arr
         remove_null = (arr) -> arr.filter (e) -> e.length
         flatten = (arr) -> if arr.length is 1 then arr[0] else arr
@@ -39,7 +40,13 @@ scrape_object = (id) ->
         # make an array of related artwork ids
         object['related-artworks'] = (+($(a).attr('href').match(/[0-9]+/g)[0]) for a in $('.object-info a'))
         #console.timeEnd 'processing'
-        
+        $('.promo-accordion > li').each (i, e) ->
+          category = process $(e).find('.category').text()
+          content = $(e).find('.accordion-inner > p').text().trim()
+          switch category
+            when 'Description' then object[category] = content
+            when 'Provenance' then object[category] = trim remove_null content.split(';')
+
         fs.writeFileSync path, JSON.stringify object
         #console.timeEnd "process #{id}"
         
