@@ -43,7 +43,7 @@ scrape_object = (id) ->
             when 'Description' then object[category] = content
             when 'Provenance' then object[category] = trim remove_null content.split(';')
 
-        fs.writeFileSync path, JSON.stringify object
+        fs.writeFileSync path, JSON.stringify object, null, 2
         
 for arg in process.argv[2..]
   scrape_object id for id in require arg
